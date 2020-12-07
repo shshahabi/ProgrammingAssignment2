@@ -6,51 +6,43 @@ in this programming assignment the goal is to take advantage of lexical scoping
 
 In this example we introduce the `<<-` operator which can be used to
 assign a value to an object in an environment that is different from the
-current environment. Below are two functions that are used to create a
-special object that stores a numeric vector and caches its mean.
+current environment. 
+below you can see how code is written 
+in the first level we get matrix a and compute the inverse and cache it in memory
 
-The first function, `makeVector` creates a special "vector", which is
-really a list containing a function to
+  ` makeCacheMatrix <- function(x = matrix()) {
+  t<-NULL   
+  
+  set<-function(y){  
+    x<<-y  
+    t<<-NULL 
+     }
+  
+  get<-function() x  
+  setinverse<-function(solve) t<<- solve  
+  getinverse<-function() t 
+  
+  list (set=set, get = get,  
+        setinverse = setinverse,
+        getinverse = getinverse)
+     }`
 
-1.  set the value of the vector
-2.  get the value of the vector
-3.  set the value of the mean
-4.  get the value of the mean
+The following function calculates the inverse of matrix but first it check if we have the same value in `makeCacheMatrix`if so then it doesnot run the execution again
+and just return that matrix and if it wasnot in the memory it going to compute the inverse and then save it as a chache so it will be available for later.
 
-<!-- -->
-
-    makeVector <- function(x = numeric()) {
-            m <- NULL
-            set <- function(y) {
-                    x <<- y
-                    m <<- NULL
-            }
-            get <- function() x
-            setmean <- function(mean) m <<- mean
-            getmean <- function() m
-            list(set = set, get = get,
-                 setmean = setmean,
-                 getmean = getmean)
+`cacheSolve <- function(x , ...) {
+  t <- x$getinverse() 
+  if(!is.null(t)){
+      message("getting cached data")
+      return(t) 
     }
 
-The following function calculates the mean of the special "vector"
-created with the above function. However, it first checks to see if the
-mean has already been calculated. If so, it `get`s the mean from the
-cache and skips the computation. Otherwise, it calculates the mean of
-the data and sets the value of the mean in the cache via the `setmean`
-function.
-
-    cachemean <- function(x, ...) {
-            m <- x$getmean()
-            if(!is.null(m)) {
-                    message("getting cached data")
-                    return(m)
-            }
-            data <- x$get()
-            m <- mean(data, ...)
-            x$setmean(m)
-            m
-    }
+    y <- x$get() 
+    x$set(y) 
+    t <- solve(y, ...) 
+    x$setinverse(t) 
+    t 
+}`
 
 ### Assignment: Caching the Inverse of a Matrix
 
